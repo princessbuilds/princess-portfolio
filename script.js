@@ -1,3 +1,4 @@
+
 (function () {
     "use strict";
 
@@ -20,11 +21,14 @@
         root.dataset.theme = theme;
 
         const isDark = theme === "dark";
-        themeToggle.setAttribute("aria-pressed", String(isDark));
-        themeToggle.setAttribute(
-            "aria-label",
-            isDark ? "Switch to light mode" : "Switch to dark mode"
-        );
+
+        if (themeToggle) {
+            themeToggle.setAttribute("aria-pressed", String(isDark));
+            themeToggle.setAttribute(
+                "aria-label",
+                isDark ? "Switch to light mode" : "Switch to dark mode"
+            );
+        }
 
         if (themeColorMeta) {
             themeColorMeta.setAttribute("content", isDark ? "#252525" : "#F8F6F2");
@@ -33,61 +37,64 @@
         try {
             localStorage.setItem("theme", theme);
         } catch (error) {
-            /* storage unavailable, the choice just won't persist */
+            /* Storage unavailable */
         }
     }
 
     applyTheme(root.dataset.theme === "dark" ? "dark" : "light");
 
-    themeToggle.addEventListener("click", function () {
-        const next = root.dataset.theme === "dark" ? "light" : "dark";
+    if (themeToggle) {
+        themeToggle.addEventListener("click", function () {
+            const next = root.dataset.theme === "dark" ? "light" : "dark";
 
-        if (reducedMotion.matches) {
-            applyTheme(next);
-            return;
-        }
+            if (reducedMotion.matches) {
+                applyTheme(next);
+                return;
+            }
 
-        // Soft cross-fade for browsers without View Transitions
-        if (!document.startViewTransition) {
-            root.classList.add("theme-transition");
-            applyTheme(next);
-            setTimeout(function () {
-                root.classList.remove("theme-transition");
-            }, 600);
-            return;
-        }
+            if (!document.startViewTransition) {
+                root.classList.add("theme-transition");
+                applyTheme(next);
 
-        // Circle expands from the toggle button
-        const rect = themeToggle.getBoundingClientRect();
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
-        const radius = Math.hypot(
-            Math.max(x, window.innerWidth - x),
-            Math.max(y, window.innerHeight - y)
-        );
+                setTimeout(function () {
+                    root.classList.remove("theme-transition");
+                }, 600);
 
-        const transition = document.startViewTransition(function () {
-            applyTheme(next);
+                return;
+            }
+
+            const rect = themeToggle.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+
+            const radius = Math.hypot(
+                Math.max(x, window.innerWidth - x),
+                Math.max(y, window.innerHeight - y)
+            );
+
+            const transition = document.startViewTransition(function () {
+                applyTheme(next);
+            });
+
+            transition.ready
+                .then(function () {
+                    root.animate(
+                        {
+                            clipPath: [
+                                "circle(0px at " + x + "px " + y + "px)",
+                                "circle(" + radius + "px at " + x + "px " + y + "px)"
+                            ]
+                        },
+                        {
+                            duration: 800,
+                            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+                            pseudoElement: "::view-transition-new(root)"
+                        }
+                    );
+                })
+                .catch(function () {});
         });
-
-        transition.ready
-            .then(function () {
-                root.animate(
-                    {
-                        clipPath: [
-                            "circle(0px at " + x + "px " + y + "px)",
-                            "circle(" + radius + "px at " + x + "px " + y + "px)"
-                        ]
-                    },
-                    {
-                        duration: 800,
-                        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-                        pseudoElement: "::view-transition-new(root)"
-                    }
-                );
-            })
-            .catch(function () {});
-    });
+    }
 
 
     /* =====================================================
@@ -99,12 +106,15 @@
     const navLinks = $("#nav-links");
 
     function isMenuOpen() {
-        return navLinks.classList.contains("open");
+        return navLinks && navLinks.classList.contains("open");
     }
 
     function setMenu(open) {
+        if (!navLinks || !menuToggle || !header) return;
+
         navLinks.classList.toggle("open", open);
         header.classList.toggle("menu-open", open);
+
         menuToggle.setAttribute("aria-expanded", String(open));
         menuToggle.setAttribute(
             "aria-label",
@@ -112,29 +122,29 @@
         );
     }
 
-    menuToggle.addEventListener("click", function () {
-        setMenu(!isMenuOpen());
-    });
+    if (menuToggle && navLinks && header) {
 
-    // Close the menu after clicking a link
-    $$("a", navLinks).forEach(function (link) {
-        link.addEventListener("click", function () {
-            setMenu(false);
+        menuToggle.addEventListener("click", function () {
+            setMenu(!isMenuOpen());
         });
-    });
 
-    // Close with Escape
-    document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape" && isMenuOpen()) {
-            setMenu(false);
-            menuToggle.focus();
-        }
-    });
+        $$("a", navLinks).forEach(function (link) {
+            link.addEventListener("click", function () {
+                setMenu(false);
+            });
+        });
 
-    // Reset when the window grows to desktop width
-    window.matchMedia("(min-width: 769px)").addEventListener("change", function (event) {
-        if (event.matches) setMenu(false);
-    });
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && isMenuOpen()) {
+                setMenu(false);
+                menuToggle.focus();
+            }
+        });
+
+        window.matchMedia("(min-width: 769px)").addEventListener("change", function (event) {
+            if (event.matches) setMenu(false);
+        });
+    }
 
 
     /* =====================================================
@@ -149,22 +159,32 @@
         const y = window.scrollY;
         const maxScroll = root.scrollHeight - window.innerHeight;
 
-        progressBar.style.setProperty("--progress", maxScroll > 0 ? y / maxScroll : 0);
-        header.classList.toggle("scrolled", y > 20);
+        if (progressBar) {
+            progressBar.style.setProperty(
+                "--progress",
+                maxScroll > 0 ? y / maxScroll : 0
+            );
+        }
 
-        // Hide on scroll down, show on scroll up
+        if (header) {
+            header.classList.toggle("scrolled", y > 20);
+        }
+
         const delta = y - lastScrollY;
 
         if (Math.abs(delta) > 6) {
             if (delta > 0 && y > 200 && !isMenuOpen()) {
-                header.classList.add("header-hidden");
+                if (header) header.classList.add("header-hidden");
             } else if (delta < 0) {
-                header.classList.remove("header-hidden");
+                if (header) header.classList.remove("header-hidden");
             }
+
             lastScrollY = y;
         }
 
-        if (y <= 200) header.classList.remove("header-hidden");
+        if (y <= 200 && header) {
+            header.classList.remove("header-hidden");
+        }
 
         scrollTicking = false;
     }
@@ -185,39 +205,46 @@
 
     const linkById = new Map();
 
-    $$("a", navLinks).forEach(function (link) {
-        linkById.set(link.getAttribute("href").slice(1), link);
-    });
+    if (navLinks) {
+        $$("a", navLinks).forEach(function (link) {
+            const href = link.getAttribute("href");
 
-    const spy = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-            if (!entry.isIntersecting) return;
-
-            linkById.forEach(function (link) {
-                link.classList.remove("active");
-                link.removeAttribute("aria-current");
-            });
-
-            const activeLink = linkById.get(entry.target.id);
-
-            if (activeLink) {
-                activeLink.classList.add("active");
-                activeLink.setAttribute("aria-current", "true");
+            if (href && href.startsWith("#")) {
+                linkById.set(href.slice(1), link);
             }
         });
-    }, { rootMargin: "-45% 0px -50% 0px" });
+    }
 
-    linkById.forEach(function (link, id) {
-        const section = document.getElementById(id);
-        if (section) spy.observe(section);
-    });
+    if ("IntersectionObserver" in window) {
+        const spy = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+
+                linkById.forEach(function (link) {
+                    link.classList.remove("active");
+                    link.removeAttribute("aria-current");
+                });
+
+                const activeLink = linkById.get(entry.target.id);
+
+                if (activeLink) {
+                    activeLink.classList.add("active");
+                    activeLink.setAttribute("aria-current", "true");
+                }
+            });
+        }, { rootMargin: "-45% 0px -50% 0px" });
+
+        linkById.forEach(function (link, id) {
+            const section = document.getElementById(id);
+            if (section) spy.observe(section);
+        });
+    }
 
 
     /* =====================================================
-       SCROLL REVEAL (headings, text, cards, form)
+       SCROLL REVEAL
        ===================================================== */
 
-    // Cards animate in row by row with a small stagger
     $$(".skills-container, .projects-container").forEach(function (grid) {
         const columns = getComputedStyle(grid).gridTemplateColumns.split(" ").length;
 
@@ -227,25 +254,31 @@
         });
     });
 
-    const revealObserver = new IntersectionObserver(function (entries, observer) {
-        entries.forEach(function (entry) {
-            if (!entry.isIntersecting) return;
+    if ("IntersectionObserver" in window) {
+        const revealObserver = new IntersectionObserver(function (entries, observer) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
 
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target);
+            });
+        }, {
+            threshold: 0.15,
+            rootMargin: "0px 0px -6% 0px"
         });
-    }, {
-        threshold: 0.15,
-        rootMargin: "0px 0px -6% 0px"
-    });
 
-    $$("[data-reveal]").forEach(function (element) {
-        revealObserver.observe(element);
-    });
+        $$("[data-reveal]").forEach(function (element) {
+            revealObserver.observe(element);
+        });
+    } else {
+        $$("[data-reveal]").forEach(function (element) {
+            element.classList.add("is-visible");
+        });
+    }
 
 
     /* =====================================================
-       HERO PARALLAX (image follows the cursor slightly)
+       HERO PARALLAX
        ===================================================== */
 
     const hero = $(".hero");
@@ -321,74 +354,145 @@
 
 
     /* =====================================================
-       CONTACT FORM VALIDATION
+       CONTACT FORM VALIDATION + FORMSPREE
        ===================================================== */
 
     const contactForm = $("#contact-form");
     const formFeedback = $("#form-feedback");
-    const nameField = $("#name");
-    const emailField = $("#email");
-    const messageField = $("#message");
-    let feedbackTimer;
 
-    function showFeedback(text, type) {
-        clearTimeout(feedbackTimer);
+    if (contactForm && formFeedback) {
 
-        formFeedback.className = "";
-        formFeedback.textContent = text;
+        const nameField = $("#name", contactForm);
+        const emailField = $("#email", contactForm);
+        const subjectField = $("#subject", contactForm);
+        const messageField = $("#message", contactForm);
 
-        // Force a reflow so the animation replays every time
-        void formFeedback.offsetWidth;
+        const submitButton = $('button[type="submit"]', contactForm);
 
-        formFeedback.classList.add("visible", type);
+        let feedbackTimer;
 
-        feedbackTimer = setTimeout(function () {
-            formFeedback.classList.remove("visible");
-        }, 6000);
-    }
+        function showFeedback(text, type) {
+            clearTimeout(feedbackTimer);
 
-    function markInvalid(field) {
-        field.classList.remove("invalid");
-        void field.offsetWidth;
-        field.classList.add("invalid");
-        field.setAttribute("aria-invalid", "true");
-    }
+            formFeedback.className = "";
+            formFeedback.textContent = text;
 
-    [nameField, emailField, messageField].forEach(function (field) {
-        field.addEventListener("input", function () {
+            void formFeedback.offsetWidth;
+
+            formFeedback.classList.add("visible", type);
+
+            feedbackTimer = setTimeout(function () {
+                formFeedback.classList.remove("visible");
+            }, 6000);
+        }
+
+        function markInvalid(field) {
             field.classList.remove("invalid");
-            field.removeAttribute("aria-invalid");
+
+            void field.offsetWidth;
+
+            field.classList.add("invalid");
+            field.setAttribute("aria-invalid", "true");
+        }
+
+        const fields = [
+            nameField,
+            emailField,
+            subjectField,
+            messageField
+        ].filter(Boolean);
+
+        fields.forEach(function (field) {
+            field.addEventListener("input", function () {
+                field.classList.remove("invalid");
+                field.removeAttribute("aria-invalid");
+            });
         });
-    });
 
-    contactForm.addEventListener("submit", function (event) {
-        event.preventDefault();
+        contactForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
 
-        const name = nameField.value.trim();
-        const email = emailField.value.trim();
-        const message = messageField.value.trim();
+            const name = nameField.value.trim();
+            const email = emailField.value.trim();
+            const subject = subjectField.value.trim();
+            const message = messageField.value.trim();
 
-        if (name === "" || email === "" || message === "") {
-            if (name === "") markInvalid(nameField);
-            if (email === "") markInvalid(emailField);
-            if (message === "") markInvalid(messageField);
+            const requiredFields = [
+                { field: nameField, value: name },
+                { field: emailField, value: email },
+                { field: subjectField, value: subject },
+                { field: messageField, value: message }
+            ];
 
-            showFeedback("Please fill in all fields.", "error");
+            const emptyFields = requiredFields.filter(function (item) {
+                return item.value === "";
+            });
 
-            [nameField, emailField, messageField]
-                .find(function (field) { return field.value.trim() === ""; })
-                .focus();
-            return;
-        }
+            if (emptyFields.length > 0) {
+                emptyFields.forEach(function (item) {
+                    markInvalid(item.field);
+                });
 
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            markInvalid(emailField);
-            showFeedback("Please enter a valid email address.", "error");
-            emailField.focus();
-            return;
-        }
+                showFeedback("Please fill in all fields.", "error");
 
-        showFeedback("Thank you! Your message is ready.", "success");
-        contactForm.reset();
-    });
+                emptyFields[0].field.focus();
+                return;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                markInvalid(emailField);
+
+                showFeedback("Please enter a valid email address.", "error");
+
+                emailField.focus();
+                return;
+            }
+
+            const originalButtonText = submitButton.textContent;
+
+            submitButton.disabled = true;
+            submitButton.textContent = "Sending...";
+
+            try {
+                const response = await fetch(contactForm.action, {
+                    method: "POST",
+                    body: new FormData(contactForm),
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                });
+
+                if (response.ok) {
+                    showFeedback(
+                        "Thank you! Your message has been sent successfully.",
+                        "success"
+                    );
+
+                    contactForm.reset();
+
+                    fields.forEach(function (field) {
+                        field.classList.remove("invalid");
+                        field.removeAttribute("aria-invalid");
+                    });
+
+                } else {
+                    showFeedback(
+                        "Sorry, your message could not be sent. Please try again.",
+                        "error"
+                    );
+                }
+
+            } catch (error) {
+                showFeedback(
+                    "Something went wrong. Please check your internet connection and try again.",
+                    "error"
+                );
+
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+        });
+    }
+
 })();

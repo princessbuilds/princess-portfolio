@@ -1,3 +1,4 @@
+
 /* =========================================================
    DESIGN TOKENS
    ========================================================= */
@@ -153,8 +154,9 @@ header.menu-open {
 
 .navbar {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
 }
 
 .logo {
@@ -183,8 +185,6 @@ header.menu-open {
     transition: color 0.3s ease;
 }
 
-/* NAVIGATION UNDERLINE ANIMATION */
-
 .nav-links a::after {
     content: "";
     position: absolute;
@@ -206,15 +206,27 @@ header.menu-open {
     color: var(--accent);
 }
 
+/* Keep both navigation buttons together */
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
 .menu-toggle,
 .theme-toggle {
     border: none;
     background: none;
     cursor: pointer;
     color: var(--text);
+    flex-shrink: 0;
 }
 
-/* Theme toggle: sun and moon swap with a spin */
+/* Theme toggle */
 
 .theme-toggle {
     position: relative;
@@ -245,22 +257,31 @@ header.menu-open {
                 opacity 0.35s ease;
 }
 
-.icon-sun {
+/* Light mode: show moon */
+
+.theme-toggle .sun-icon {
     opacity: 0;
     transform: rotate(-90deg) scale(0.4);
 }
 
-:root[data-theme="dark"] .icon-sun {
+.theme-toggle .moon-icon {
     opacity: 1;
     transform: none;
 }
 
-:root[data-theme="dark"] .icon-moon {
+/* Dark mode: show sun */
+
+:root[data-theme="dark"] .theme-toggle .sun-icon {
+    opacity: 1;
+    transform: none;
+}
+
+:root[data-theme="dark"] .theme-toggle .moon-icon {
     opacity: 0;
     transform: rotate(90deg) scale(0.4);
 }
 
-/* Hamburger morphs into an X */
+/* Hamburger menu */
 
 .menu-toggle {
     display: none;
@@ -282,9 +303,17 @@ header.menu-open {
                 opacity 0.25s ease;
 }
 
-.menu-toggle span:nth-child(1) { top: 14px; }
-.menu-toggle span:nth-child(2) { top: 20px; }
-.menu-toggle span:nth-child(3) { top: 26px; }
+.menu-toggle span:nth-child(1) {
+    top: 14px;
+}
+
+.menu-toggle span:nth-child(2) {
+    top: 20px;
+}
+
+.menu-toggle span:nth-child(3) {
+    top: 26px;
+}
 
 .menu-toggle[aria-expanded="true"] span:nth-child(1) {
     top: 20px;
@@ -326,8 +355,6 @@ header.menu-open {
 .hero-content {
     max-width: 600px;
 }
-
-/* Soft drifting background glow */
 
 .orb {
     position: absolute;
@@ -399,16 +426,10 @@ header.menu-open {
 }
 
 @keyframes lineGrow {
-    from { transform: scaleX(0); }
+    from {
+        transform: scaleX(0);
+    }
 }
-
-.hero h1 {
-    font-size: clamp(38px, 6vw, 65px);
-    line-height: 1.2;
-    margin: 15px 0;
-}
-
-/* Headline: each word slides up out of a mask */
 
 .word {
     display: inline-block;
@@ -425,11 +446,13 @@ header.menu-open {
 }
 
 @keyframes wordUp {
-    from { transform: translateY(110%); }
-    to   { transform: translateY(0); }
+    from {
+        transform: translateY(110%);
+    }
+    to {
+        transform: translateY(0);
+    }
 }
-
-/* Generic staggered entrance */
 
 .rise {
     animation: rise 0.9s var(--ease-out) both;
@@ -445,6 +468,12 @@ header.menu-open {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.hero h1 {
+    font-size: clamp(38px, 6vw, 65px);
+    line-height: 1.2;
+    margin: 15px 0;
 }
 
 .hero h2 {
@@ -465,8 +494,6 @@ header.menu-open {
     gap: 15px;
     flex-wrap: wrap;
 }
-
-/* HERO IMAGE */
 
 .hero-image {
     flex-shrink: 0;
@@ -517,20 +544,28 @@ header.menu-open {
 }
 
 @keyframes frameReveal {
-    from { clip-path: inset(100% 0 0 0); }
-    to   { clip-path: inset(0 0 0 0); }
+    from {
+        clip-path: inset(100% 0 0 0);
+    }
+    to {
+        clip-path: inset(0 0 0 0);
+    }
 }
 
 @keyframes imageZoom {
-    from { transform: scale(1.3); }
-    to   { transform: scale(1); }
+    from {
+        transform: scale(1.3);
+    }
+    to {
+        transform: scale(1);
+    }
 }
 
 @keyframes float {
-    to { transform: translateY(-14px); }
+    to {
+        transform: translateY(-14px);
+    }
 }
-
-/* Scroll hint */
 
 .scroll-hint {
     position: absolute;
@@ -559,14 +594,27 @@ header.menu-open {
 }
 
 @keyframes wheel {
-    0%   { opacity: 0; transform: translateY(0); }
-    30%  { opacity: 1; }
-    80%  { opacity: 0; transform: translateY(14px); }
-    100% { opacity: 0; transform: translateY(14px); }
+    0% {
+        opacity: 0;
+        transform: translateY(0);
+    }
+    30% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(14px);
+    }
 }
 
 @keyframes fadeIn {
-    to { opacity: 0.7; }
+    to {
+        opacity: 0.7;
+    }
 }
 
 
@@ -596,8 +644,6 @@ header.menu-open {
                 translate 0.25s ease-out;
 }
 
-/* Light sweep on hover */
-
 .btn::before {
     content: "";
     position: absolute;
@@ -622,8 +668,6 @@ header.menu-open {
 .btn:active {
     transform: translateY(-1px) scale(0.97);
 }
-
-/* Secondary button fills up from the bottom */
 
 .secondary-btn {
     background-color: transparent;
@@ -709,7 +753,7 @@ header.menu-open {
 
 
 /* =========================================================
-   CARDS (skills + projects)
+   CARDS: SKILLS AND PROJECTS
    ========================================================= */
 
 .skills-container,
@@ -754,8 +798,6 @@ header.menu-open {
     box-shadow: var(--shadow-lg);
 }
 
-/* Cursor spotlight */
-
 .skill-card::before,
 .project-card::before {
     content: "";
@@ -773,8 +815,6 @@ header.menu-open {
 .project-card:hover::before {
     opacity: 1;
 }
-
-/* Accent line that draws itself along the bottom edge */
 
 .skill-card::after,
 .project-card::after {
@@ -808,8 +848,6 @@ header.menu-open {
 .skill-card p {
     color: var(--muted);
 }
-
-/* Project number */
 
 .project-content::before {
     counter-increment: project;
@@ -885,13 +923,57 @@ header.menu-open {
     text-align: center;
 }
 
+
+
+.contact-container {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    align-items: start;
+    gap: 40px;
+    max-width: 1100px;
+    margin: 40px auto 0;
+    text-align: left;
+}
+
+.contact-info {
+    text-align: left;
+}
+
+.contact-form-card {
+    width: 100%;
+    padding: 35px;
+    background-color: var(--surface);
+    border: 1.5px solid var(--accent);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
 .contact form {
-    max-width: 550px;
-    margin: 30px auto 0;
+    width: 100%;
+    margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 18px;
+    text-align: left;
 }
+
+.contact .form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 8px;
+}
+
+.contact .form-group label {
+    display: block;
+    width: 100%;
+    text-align: left;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
 
 .contact input,
 .contact textarea {
@@ -930,10 +1012,18 @@ header.menu-open {
 }
 
 @keyframes shake {
-    20% { translate: -7px 0; }
-    40% { translate: 6px 0; }
-    60% { translate: -4px 0; }
-    80% { translate: 2px 0; }
+    20% {
+        translate: -7px 0;
+    }
+    40% {
+        translate: 6px 0;
+    }
+    60% {
+        translate: -4px 0;
+    }
+    80% {
+        translate: 2px 0;
+    }
 }
 
 .contact textarea {
@@ -964,6 +1054,38 @@ header.menu-open {
     content: "✓ ";
 }
 
+.contact .section-heading {
+    max-width: 650px;
+    margin: 0 auto 55px;
+    text-align: center;
+}
+
+.contact .section-heading .section-label {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.contact .section-heading h1 {
+    margin-bottom: 18px;
+    font-family: "Playfair Display", serif;
+    font-size: clamp(42px, 6vw, 64px);
+    line-height: 1.15;
+}
+
+.contact .section-heading p {
+    max-width: 500px;
+    margin: 0 auto;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+
+
 
 /* =========================================================
    FOOTER
@@ -979,10 +1101,9 @@ footer {
 
 
 /* =========================================================
-   THEME SWITCH FALLBACK + VIEW TRANSITION
+   THEME TRANSITION
    ========================================================= */
 
-/* Browsers without the View Transitions API get a soft cross-fade */
 html.theme-transition *,
 html.theme-transition *::before,
 html.theme-transition *::after {
@@ -992,7 +1113,6 @@ html.theme-transition *::after {
                 box-shadow 0.5s ease !important;
 }
 
-/* The circular reveal itself is driven from script.js */
 ::view-transition-old(root),
 ::view-transition-new(root) {
     animation: none;
@@ -1001,7 +1121,7 @@ html.theme-transition *::after {
 
 
 /* =========================================================
-   TABLET + MOBILE
+   TABLET
    ========================================================= */
 
 @media (max-width: 1024px) {
@@ -1019,6 +1139,11 @@ html.theme-transition *::after {
     }
 }
 
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
 @media (max-width: 768px) {
 
     header {
@@ -1031,22 +1156,50 @@ html.theme-transition *::after {
     }
 
     .navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         flex-wrap: wrap;
+    }
+
+    .logo {
+        order: 1;
+        margin-right: auto;
+    }
+
+    .nav-actions {
+        order: 2;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-left: auto;
     }
 
     .menu-toggle {
         display: block;
-        margin-left: auto;
-        margin-right: 6px;
+        margin: 0 8px 0 0;
+        order: 2;
     }
 
-    /* Menu slides open and links stagger in */
+    .theme-toggle{
+        order: 3;
+        margin: 0;
+    }
+
+    .navbar > nav {
+        order: 3;
+        flex-basis: 100%;
+        width: 100%;
+    }
 
     .nav-links {
-        order: 3;
-        width: 100%;
+        order: 4;
+        display: flex;
         flex-direction: column;
         gap: 0;
+        width: 100%;
         max-height: 0;
         overflow: hidden;
         opacity: 0;
@@ -1078,11 +1231,25 @@ html.theme-transition *::after {
         transition-delay: calc(var(--i, 0) * 60ms + 120ms);
     }
 
-    .nav-links li:nth-child(1) { --i: 0; }
-    .nav-links li:nth-child(2) { --i: 1; }
-    .nav-links li:nth-child(3) { --i: 2; }
-    .nav-links li:nth-child(4) { --i: 3; }
-    .nav-links li:nth-child(5) { --i: 4; }
+    .nav-links li:nth-child(1) {
+        --i: 0;
+    }
+
+    .nav-links li:nth-child(2) {
+        --i: 1;
+    }
+
+    .nav-links li:nth-child(3) {
+        --i: 2;
+    }
+
+    .nav-links li:nth-child(4) {
+        --i: 3;
+    }
+
+    .nav-links li:nth-child(5) {
+        --i: 4;
+    }
 
     .nav-links a {
         display: inline-block;
@@ -1125,6 +1292,15 @@ html.theme-transition *::after {
 
     .section-padding {
         padding: 64px 6%;
+    }
+
+    .contact-container{
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .contact-form-card{
+        padding: 24px 18px;
     }
 }
 

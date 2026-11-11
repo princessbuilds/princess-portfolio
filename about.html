@@ -1,0 +1,245 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="Learn more about Princess Egemole, her background in Mechatronics Engineering, UI/UX Design and Frontend Development.">
+
+    <meta name="theme-color" content="#F8F6F2">
+
+    <title>About Me | Princess Egemole</title>
+
+    <!-- Apply saved theme before the page loads -->
+    <script>
+        (function () {
+            var root = document.documentElement;
+            root.classList.add("js");
+
+            var theme = null;
+
+            try {
+                theme = localStorage.getItem("theme");
+            } catch (e) {}
+
+            if (!theme) {
+                theme = window.matchMedia("(prefers-color-scheme: dark)").matches
+                    ? "dark"
+                    : "light";
+            }
+
+            root.dataset.theme = theme;
+        })();
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Skip Link -->
+    <a href="#about" class="skip-link">Skip to content</a>
+
+    <!-- Scroll Progress -->
+    <div class="scroll-progress" aria-hidden="true"></div>
+
+
+    <!-- Navigation -->
+    <header>
+        <nav class="navbar" aria-label="Main navigation">
+
+            <a href="index.html" class="logo">PE.</a>
+
+            <button
+                class="menu-toggle"
+                id="menu-toggle"
+                type="button"
+                aria-label="Open navigation"
+                aria-expanded="false"
+                aria-controls="nav-links">
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </button>
+
+            <ul class="nav-links" id="nav-links">
+
+                <li>
+                    <a href="index.html">Home</a>
+                </li>
+
+                <li>
+                    <a href="about.html" class="active" aria-current="page">
+                        About
+                    </a>
+                </li>
+
+                <li>
+                    <a href="project.html">Projects</a>
+                </li>
+
+                <li>
+                    <a href="contact.html">Contact</a>
+                </li>
+
+            </ul>
+
+            
+<button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+    <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path>
+    </svg>
+
+    <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+</button>
+
+        </nav>
+    </header>
+
+
+    <main>
+
+        <!-- About Section -->
+        <section class="about section-padding" id="about">
+
+            <div class="section-heading" data-reveal>
+
+                <p class="intro">GET TO KNOW ME</p>
+
+                <h1>About Me</h1>
+
+            </div>
+
+            <div class="about-content" data-reveal>
+
+                <h2>Hello, I'm Princess Egemole.</h2>
+
+                <p>
+                    I am a Mechatronics Engineering graduate with an interest
+                    in technology, creativity and problem-solving. My background
+                    has helped me develop analytical thinking and a passion
+                    for building useful solutions.
+                </p>
+
+                <p>
+                    I also have experience in UI/UX Design, where I focus on
+                    creating user-friendly and visually appealing digital
+                    experiences. I enjoy understanding users' needs and turning
+                    ideas into meaningful designs.
+                </p>
+
+                <p>
+                    Currently, I am developing my Frontend Development skills
+                    by building responsive and interactive websites using
+                    HTML, CSS, Bootstrap and JavaScript.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- Skills Section -->
+        <section class="skills section-padding" id="skills">
+
+            <div class="section-heading" data-reveal>
+
+                <p class="intro">WHAT I WORK WITH</p>
+
+                <h2>My Skills</h2>
+
+            </div>
+
+            <div class="skills-container">
+
+                <div class="skill-card" data-reveal>
+
+                    <h3>UI/UX Design</h3>
+
+                    <p>
+                        Figma, Wireframing, Prototyping and User Research.
+                    </p>
+
+                </div>
+
+                <div class="skill-card" data-reveal>
+
+                    <h3>Frontend Development</h3>
+
+                    <p>
+                        HTML, CSS, Bootstrap and JavaScript.
+                    </p>
+
+                </div>
+
+                <div class="skill-card" data-reveal>
+
+                    <h3>Engineering</h3>
+
+                    <p>
+                        Mechatronics, Technical Thinking and Problem-Solving.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Call to Action -->
+        <section class="contact section-padding">
+
+            <div class="section-heading" data-reveal>
+
+                <p class="intro">LET'S CONNECT</p>
+
+                <h2>Interested in Working Together?</h2>
+
+            </div>
+
+            <div class="hero-buttons" data-reveal>
+
+                <a href="contact.html" class="btn">
+                    Contact Me
+                </a>
+
+                <a href="project.html" class="btn secondary-btn">
+                    View My Projects
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Footer -->
+    <footer>
+
+        <p>© 2026 Princess Egemole. All rights reserved.</p>
+
+        <p>Designed with purpose. Built with code.</p>
+
+    </footer>
+
+
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
+
+</body>
+</html>
