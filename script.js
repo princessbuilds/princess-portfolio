@@ -495,4 +495,151 @@
         });
     }
 
+    // HOMEPAGE CONTACT FORM VALIDATION
+    
+
+    // HOMEPAGE CONTACT FORM VALIDATION
+
+    const homeContactForm = document.querySelector("#home-contact-form");
+
+    if (homeContactForm) {
+        const homeName = homeContactForm.querySelector("#name");
+        const homeEmail = homeContactForm.querySelector("#email");
+        const homeMessage = homeContactForm.querySelector("#message");
+        const homeFeedback = homeContactForm.querySelector("#form-feedback");
+        const homeSubmitButton = homeContactForm.querySelector('button[type="submit"]');
+
+        let homeFeedbackTimer;
+
+        function showHomeFeedback(text, type) {
+            clearTimeout(homeFeedbackTimer);
+
+            homeFeedback.className = "";
+            homeFeedback.textContent = text;
+
+            void homeFeedback.offsetWidth;
+
+            homeFeedback.classList.add("visible", type);
+
+            homeFeedbackTimer = setTimeout(function () {
+                homeFeedback.classList.remove("visible");
+            }, 6000);
+        }
+
+        function markHomeInvalid(field) {
+            field.classList.remove("invalid");
+
+            void field.offsetWidth;
+
+            field.classList.add("invalid");
+            field.setAttribute("aria-invalid", "true");
+        }
+
+        const homeFields = [
+            homeName,
+            homeEmail,
+            homeMessage
+        ];
+
+        homeFields.forEach(function (field) {
+            field.addEventListener("input", function () {
+                field.classList.remove("invalid");
+                field.removeAttribute("aria-invalid");
+            });
+        });
+
+        homeContactForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const name = homeName.value.trim();
+            const email = homeEmail.value.trim();
+            const message = homeMessage.value.trim();
+
+            const requiredFields = [
+                { field: homeName, value: name },
+                { field: homeEmail, value: email },
+                { field: homeMessage, value: message }
+            ];
+
+            const emptyFields = requiredFields.filter(function (item) {
+                return item.value === "";
+            });
+
+            if (emptyFields.length > 0) {
+                emptyFields.forEach(function (item) {
+                    markHomeInvalid(item.field);
+                });
+
+                showHomeFeedback("Please fill in all fields.", "error");
+
+                emptyFields[0].field.focus();
+                return;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                markHomeInvalid(homeEmail);
+
+                showHomeFeedback("Please enter a valid email address.", "error");
+
+                homeEmail.focus();
+                return;
+            }
+
+            if (message.length < 10) {
+                markHomeInvalid(homeMessage);
+
+                showHomeFeedback("Your message must be at least 10 characters.", "error");
+
+                homeMessage.focus();
+                return;
+            }
+
+            const originalButtonText = homeSubmitButton.textContent;
+
+            homeSubmitButton.disabled = true;
+            homeSubmitButton.textContent = "Sending...";
+
+            try {
+                const response = await fetch(homeContactForm.action, {
+                    method: "POST",
+                    body: new FormData(homeContactForm),
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                });
+
+                if (response.ok) {
+                    showHomeFeedback(
+                        "Thank you! Your message has been sent successfully.",
+                        "success"
+                    );
+
+                    homeContactForm.reset();
+
+                    homeFields.forEach(function (field) {
+                        field.classList.remove("invalid");
+                        field.removeAttribute("aria-invalid");
+                    });
+
+                } else {
+                    showHomeFeedback(
+                        "Sorry, your message could not be sent. Please try again.",
+                        "error"
+                    );
+                }
+
+            } catch (error) {
+                showHomeFeedback(
+                    "Something went wrong. Please check your internet connection and try again.",
+                    "error"
+                );
+
+            } finally {
+                homeSubmitButton.disabled = false;
+                homeSubmitButton.textContent = originalButtonText;
+            }
+        });
+    }
+
+
 })();
