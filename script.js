@@ -31,7 +31,10 @@
         }
 
         if (themeColorMeta) {
-            themeColorMeta.setAttribute("content", isDark ? "#252525" : "#F8F6F2");
+            themeColorMeta.setAttribute(
+                "content",
+                isDark ? "#252525" : "#F8F6F2"
+            );
         }
 
         try {
@@ -123,7 +126,6 @@
     }
 
     if (menuToggle && navLinks && header) {
-
         menuToggle.addEventListener("click", function () {
             setMenu(!isMenuOpen());
         });
@@ -141,14 +143,22 @@
             }
         });
 
-        window.matchMedia("(min-width: 769px)").addEventListener("change", function (event) {
+        const desktopQuery = window.matchMedia("(min-width: 769px)");
+
+        const handleDesktopChange = function (event) {
             if (event.matches) setMenu(false);
-        });
+        };
+
+        if (desktopQuery.addEventListener) {
+            desktopQuery.addEventListener("change", handleDesktopChange);
+        } else if (desktopQuery.addListener) {
+            desktopQuery.addListener(handleDesktopChange);
+        }
     }
 
 
     /* =====================================================
-       SCROLL: progress bar + smart header
+       SCROLL: PROGRESS BAR + SMART HEADER
        ===================================================== */
 
     const progressBar = $(".scroll-progress");
@@ -200,7 +210,7 @@
 
 
     /* =====================================================
-       ACTIVE NAV LINK (scroll spy)
+       ACTIVE NAV LINK (SCROLL SPY)
        ===================================================== */
 
     const linkById = new Map();
@@ -339,8 +349,14 @@
                 card.style.setProperty("--my", y + "px");
 
                 if (tilt) {
-                    card.style.setProperty("--rx", (y / rect.height - 0.5) * -6 + "deg");
-                    card.style.setProperty("--ry", (x / rect.width - 0.5) * 6 + "deg");
+                    card.style.setProperty(
+                        "--rx",
+                        (y / rect.height - 0.5) * -6 + "deg"
+                    );
+                    card.style.setProperty(
+                        "--ry",
+                        (x / rect.width - 0.5) * 6 + "deg"
+                    );
                 }
             });
 
@@ -354,35 +370,56 @@
 
 
     /* =====================================================
-       CONTACT FORM VALIDATION + FORMSPREE
+       CONTACT FORMS: VALIDATION + FORMSPREE
+       Works with both Home and Contact page forms.
        ===================================================== */
 
-    const contactForm = $("#contact-form");
-    const formFeedback = $("#form-feedback");
+    function setupContactForm(formSelector, settings) {
+        const form = $(formSelector);
 
-    if (contactForm && formFeedback) {
+        if (!form) return;
 
-        const nameField = $("#name", contactForm);
-        const emailField = $("#email", contactForm);
-        const subjectField = $("#subject", contactForm);
-        const messageField = $("#message", contactForm);
+        const nameField = $("#name", form);
+        const emailField = $("#email", form);
+        const messageField = $("#message", form);
+        const subjectField = settings.hasSubject ? $("#subject", form) : null;
+        const feedback = $("#form-feedback", form);
+        const submitButton = $('button[type="submit"]', form);
 
-        const submitButton = $('button[type="submit"]', contactForm);
+        const fields = [
+            nameField,
+            emailField,
+            ...(settings.hasSubject ? [subjectField] : []),
+            messageField
+        ];
+
+        if (
+            !nameField ||
+            !emailField ||
+            !messageField ||
+            !feedback ||
+            !submitButton ||
+            fields.some(function (field) {
+                return !field;
+            })
+        ) {
+            return;
+        }
 
         let feedbackTimer;
 
-        function showFeedback(text, type) {
+        function showFeedback(message, type) {
             clearTimeout(feedbackTimer);
 
-            formFeedback.className = "";
-            formFeedback.textContent = text;
+            feedback.className = "";
+            feedback.textContent = message;
 
-            void formFeedback.offsetWidth;
+            void feedback.offsetWidth;
 
-            formFeedback.classList.add("visible", type);
+            feedback.classList.add("visible", type);
 
             feedbackTimer = setTimeout(function () {
-                formFeedback.classList.remove("visible");
+                feedback.classList.remove("visible");
             }, 6000);
         }
 
@@ -395,36 +432,28 @@
             field.setAttribute("aria-invalid", "true");
         }
 
-        const fields = [
-            nameField,
-            emailField,
-            subjectField,
-            messageField
-        ].filter(Boolean);
+        function clearInvalid(field) {
+            field.classList.remove("invalid");
+            field.removeAttribute("aria-invalid");
+        }
 
         fields.forEach(function (field) {
             field.addEventListener("input", function () {
-                field.classList.remove("invalid");
-                field.removeAttribute("aria-invalid");
+                clearInvalid(field);
             });
         });
 
-        contactForm.addEventListener("submit", async function (event) {
+        form.addEventListener("submit", async function (event) {
             event.preventDefault();
 
-            const name = nameField.value.trim();
-            const email = emailField.value.trim();
-            const subject = subjectField.value.trim();
-            const message = messageField.value.trim();
+            const values = fields.map(function (field) {
+                return {
+                    field: field,
+                    value: field.value.trim()
+                };
+            });
 
-            const requiredFields = [
-                { field: nameField, value: name },
-                { field: emailField, value: email },
-                { field: subjectField, value: subject },
-                { field: messageField, value: message }
-            ];
-
-            const emptyFields = requiredFields.filter(function (item) {
+            const emptyFields = values.filter(function (item) {
                 return item.value === "";
             });
 
@@ -434,17 +463,34 @@
                 });
 
                 showFeedback("Please fill in all fields.", "error");
-
                 emptyFields[0].field.focus();
                 return;
             }
+
+            const email = emailField.value.trim();
 
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                 markInvalid(emailField);
 
                 showFeedback("Please enter a valid email address.", "error");
-
                 emailField.focus();
+                return;
+            }
+
+            if (
+                settings.minimumMessageLength &&
+                messageField.value.trim().length < settings.minimumMessageLength
+            ) {
+                markInvalid(messageField);
+
+                showFeedback(
+                    "Your message must be at least " +
+                    settings.minimumMessageLength +
+                    " characters.",
+                    "error"
+                );
+
+                messageField.focus();
                 return;
             }
 
@@ -454,9 +500,9 @@
             submitButton.textContent = "Sending...";
 
             try {
-                const response = await fetch(contactForm.action, {
+                const response = await fetch(form.action, {
                     method: "POST",
-                    body: new FormData(contactForm),
+                    body: new FormData(form),
                     headers: {
                         "Accept": "application/json"
                     }
@@ -468,11 +514,10 @@
                         "success"
                     );
 
-                    contactForm.reset();
+                    form.reset();
 
                     fields.forEach(function (field) {
-                        field.classList.remove("invalid");
-                        field.removeAttribute("aria-invalid");
+                        clearInvalid(field);
                     });
 
                 } else {
@@ -495,151 +540,17 @@
         });
     }
 
-    // HOMEPAGE CONTACT FORM VALIDATION
-    
+    /* Homepage form: name, email and message */
+    setupContactForm("#home-contact-form", {
+        hasSubject: false,
+        minimumMessageLength: 10
+    });
 
-    // HOMEPAGE CONTACT FORM VALIDATION
-
-    const homeContactForm = document.querySelector("#home-contact-form");
-
-    if (homeContactForm) {
-        const homeName = homeContactForm.querySelector("#name");
-        const homeEmail = homeContactForm.querySelector("#email");
-        const homeMessage = homeContactForm.querySelector("#message");
-        const homeFeedback = homeContactForm.querySelector("#form-feedback");
-        const homeSubmitButton = homeContactForm.querySelector('button[type="submit"]');
-
-        let homeFeedbackTimer;
-
-        function showHomeFeedback(text, type) {
-            clearTimeout(homeFeedbackTimer);
-
-            homeFeedback.className = "";
-            homeFeedback.textContent = text;
-
-            void homeFeedback.offsetWidth;
-
-            homeFeedback.classList.add("visible", type);
-
-            homeFeedbackTimer = setTimeout(function () {
-                homeFeedback.classList.remove("visible");
-            }, 6000);
-        }
-
-        function markHomeInvalid(field) {
-            field.classList.remove("invalid");
-
-            void field.offsetWidth;
-
-            field.classList.add("invalid");
-            field.setAttribute("aria-invalid", "true");
-        }
-
-        const homeFields = [
-            homeName,
-            homeEmail,
-            homeMessage
-        ];
-
-        homeFields.forEach(function (field) {
-            field.addEventListener("input", function () {
-                field.classList.remove("invalid");
-                field.removeAttribute("aria-invalid");
-            });
-        });
-
-        homeContactForm.addEventListener("submit", async function (event) {
-            event.preventDefault();
-
-            const name = homeName.value.trim();
-            const email = homeEmail.value.trim();
-            const message = homeMessage.value.trim();
-
-            const requiredFields = [
-                { field: homeName, value: name },
-                { field: homeEmail, value: email },
-                { field: homeMessage, value: message }
-            ];
-
-            const emptyFields = requiredFields.filter(function (item) {
-                return item.value === "";
-            });
-
-            if (emptyFields.length > 0) {
-                emptyFields.forEach(function (item) {
-                    markHomeInvalid(item.field);
-                });
-
-                showHomeFeedback("Please fill in all fields.", "error");
-
-                emptyFields[0].field.focus();
-                return;
-            }
-
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                markHomeInvalid(homeEmail);
-
-                showHomeFeedback("Please enter a valid email address.", "error");
-
-                homeEmail.focus();
-                return;
-            }
-
-            if (message.length < 10) {
-                markHomeInvalid(homeMessage);
-
-                showHomeFeedback("Your message must be at least 10 characters.", "error");
-
-                homeMessage.focus();
-                return;
-            }
-
-            const originalButtonText = homeSubmitButton.textContent;
-
-            homeSubmitButton.disabled = true;
-            homeSubmitButton.textContent = "Sending...";
-
-            try {
-                const response = await fetch(homeContactForm.action, {
-                    method: "POST",
-                    body: new FormData(homeContactForm),
-                    headers: {
-                        "Accept": "application/json"
-                    }
-                });
-
-                if (response.ok) {
-                    showHomeFeedback(
-                        "Thank you! Your message has been sent successfully.",
-                        "success"
-                    );
-
-                    homeContactForm.reset();
-
-                    homeFields.forEach(function (field) {
-                        field.classList.remove("invalid");
-                        field.removeAttribute("aria-invalid");
-                    });
-
-                } else {
-                    showHomeFeedback(
-                        "Sorry, your message could not be sent. Please try again.",
-                        "error"
-                    );
-                }
-
-            } catch (error) {
-                showHomeFeedback(
-                    "Something went wrong. Please check your internet connection and try again.",
-                    "error"
-                );
-
-            } finally {
-                homeSubmitButton.disabled = false;
-                homeSubmitButton.textContent = originalButtonText;
-            }
-        });
-    }
+    /* Contact page form: name, email, subject and message */
+    setupContactForm("#contact-form", {
+        hasSubject: true,
+        minimumMessageLength: 0
+    });
 
 
 })();

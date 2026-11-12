@@ -1085,6 +1085,12 @@ header.menu-open {
 }
 
 
+/* Spacing for About and Featured Projects buttons */
+.about > .hero-buttons,
+.projects > .hero-buttons {
+    margin-top: 30px;
+}
+
 
 
 /* =========================================================
